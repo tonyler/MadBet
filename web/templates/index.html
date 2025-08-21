@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}MadBet{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Brand Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="brand-header text-center mb-4">
+                <div class="brand-logo mb-2">
+                    <h1 class="display-4 mb-3" style="margin-left: -0.5em;">
+                        🧪 MadBet
+                    </h1>
+                    <p class="lead text-muted mb-0">
+                        Mad Scientists' experimental betting platform<br>
+                        Create your own experiments (bets)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8 col-md-10">
+            <div class="search-container">
+                <div class="text-center mb-4">
+                    <h2 class="h4 mb-3">
+                        <i class="fas fa-search"></i> Find Betting Experiments
+                    </h2>
+                </div>
+                
+                <!-- Search Form -->
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <form method="GET" action="{{ url_for('search_bet') }}" class="d-flex gap-3">
+                            <div class="flex-grow-1">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-hashtag"></i>
+                                    </span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="bet_id" 
+                                           placeholder="Search bet by ID (e.g., 1, 2, 3...)"
+                                           min="1"
+                                           value="{{ request.args.get('bet_id', '') }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                🔍
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if bets %}
+        <!-- Active Bets Section -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0">
+                        <span class="badge badge-live me-2">
+                            <i class="fas fa-circle"></i> Live
+                        </span>
+                        Active Betting Pools
+                    </h2>
+                    <a href="{{ url_for('create_bet_page') }}" class="btn btn-success">
+                        <i class="fas fa-plus-circle"></i> Create New Bet
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bet Cards -->
+        <div class="row">
+            {% for bet in bets %}
+            <div class="col-12 slide-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                <div class="card bet-card active mb-4">
+                    <div class="card-header" role="button" data-bs-toggle="collapse" data-bs-target="#bet-details-{{ bet.id }}" aria-expanded="false" aria-controls="bet-details-{{ bet.id }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 class="mb-1">
+                                    <span class="badge badge-live me-2">
+                                        <i class="fas fa-circle"></i> Live
+                                    </span>
+                                    Bet #{{ bet.id }}
+                                    {% if bet.lock_info and bet.lock_info.type != 'indefinite' %}
+                                    <span class="badge {% if bet.lock_info.type == 'countdown' %}badge-warning{% else %}badge-danger{% endif %} ms-2">
+                                        <i class="fas fa-hourglass-half"></i> {{ bet.lock_info.display }}
+                                    </span>
+                                    {% endif %}
+                                </h4>
+                                <div class="bet-question">{{ bet.question }}</div>
+                            </div>
+                            <div class="text-end d-flex align-items-center gap-3">
+                                <div>
+                                    <div class="token-amount h5 mb-0">
+                                        {{ bet.total_pool | format_token }} 
+                                        {% if bet.bet_token.upper() == 'OSMO' %}
+                                            <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                        {% elif bet.bet_token.upper() == 'LAB' %}
+                                            <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                        {% else %}
+                                            {{ bet.bet_token.upper() }}
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-light">Total Pool</small>
+                                    <div class="entry-cost mt-1">
+                                        <small class="text-muted">
+                                            Entry: {{ bet.bet_amount | format_token }} 
+                                            {% if bet.bet_token.upper() == 'OSMO' %}
+                                                <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline-small">
+                                            {% elif bet.bet_token.upper() == 'LAB' %}
+                                                <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline-small">
+                                            {% else %}
+                                                {{ bet.bet_token.upper() }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="collapse-toggle">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="collapse" id="bet-details-{{ bet.id }}">
+                        <div class="card-body">
+                        <!-- Bet Metadata -->
+                        <div class="bet-metadata">
+                            <div class="item">
+                                <i class="fas fa-user-astronaut"></i>
+                                <span><strong>Creator:</strong> {{ bet.creator | get_username }}</span>
+                            </div>
+                            <div class="item">
+                                <i class="fas fa-coins"></i>
+                                <span><strong>Entry:</strong> {{ bet.bet_amount | format_token }} 
+                                    {% if bet.bet_token.upper() == 'OSMO' %}
+                                        <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                    {% elif bet.bet_token.upper() == 'LAB' %}
+                                        <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                    {% else %}
+                                        {{ bet.bet_token.upper() }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="item">
+                                <i class="fas fa-users"></i>
+                                <span><strong>Participants:</strong> {{ bet.participants | length }}</span>
+                            </div>
+                            <div class="item">
+                                <i class="fas fa-clock"></i>
+                                <span><strong>Created:</strong> {{ bet.created_at | format_datetime }}</span>
+                            </div>
+                            {% if bet.lock_info %}
+                            <div class="item">
+                                <i class="fas fa-hourglass-half"></i>
+                                <span><strong>Lock Status:</strong> 
+                                    {% if bet.lock_info.type == 'indefinite' %}
+                                        <span class="text-success">{{ bet.lock_info.display }}</span>
+                                    {% elif bet.lock_info.type == 'countdown' %}
+                                        <span class="text-warning">{{ bet.lock_info.display }}</span>
+                                    {% else %}
+                                        <span class="text-danger">{{ bet.lock_info.display }}</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Betting Options -->
+                        <div class="bet-options">
+                            <h6 class="mb-3"><i class="fas fa-list-ul"></i> Betting Options</h6>
+                            {% for option in bet.options %}
+                                {% set option_bets = bet.participants | selectattr('option', 'equalto', loop.index0) | list %}
+                                {% set option_total = option_bets | length * bet.bet_amount %}
+                                {% set option_percentage = (option_total / bet.total_pool * 100) if bet.total_pool > 0 else 0 %}
+                                
+                                <div class="bet-option" id="bet-option-{{ bet.id }}-{{ loop.index0 }}">
+                                    <div class="option-header">
+                                        <div class="option-name">
+                                            <strong>{{ loop.index }}.</strong> {{ option }}
+                                        </div>
+                                        <div class="option-stats">
+                                            <span class="badge badge-primary">
+                                                {{ option_bets | length }} bet{{ 's' if option_bets | length != 1 else '' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-progress">
+                                        <div class="option-progress-bar" style="width: {{ option_percentage }}%"></div>
+                                    </div>
+                                    <div class="mt-2 d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ "%.1f" | format(option_percentage) }}% of total pool</small>
+                                        <!-- User's existing bet indicator (will be populated by JavaScript) -->
+                                        <small class="user-bet-indicator" style="display: none;"></small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Total Participants -->
+                        <div class="bet-participants">
+                            <h6 class="mb-3"><i class="fas fa-users"></i> Total Participants: {{ bet.participants | length }}</h6>
+                        </div>
+                    </div>
+                    
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="discord-join-link">
+                                    <a href="https://discord.gg/cHXdw2yJnx" target="_blank" class="discord-link">
+                                        <i class="fab fa-discord"></i>
+                                        BET THROUGH DISCORD BOT
+                                    </a>
+                                </div>
+                                <span class="badge badge-warning">
+                                    Bot fee: 5%
+                                </span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <div class="card text-center empty-state-card">
+                    <div class="empty-state-bg"></div>
+                    <div class="card-body py-5 position-relative">
+                        <div class="mb-4">
+                            <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="Osmosis" class="empty-state-logo mb-3">
+                        </div>
+                        <h3 class="mb-3">🧪 Lab Currently Empty</h3>
+                        <p class="text-muted mb-4">
+                            No active experiments running at the moment.<br>
+                            Start a new betting experiment using the Discord bot! 🚀
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('create_bet_page') }}" class="btn btn-success">
+                                <i class="fas fa-plus-circle"></i> Create New Bet
+                            </a>
+                            <a href="{{ url_for('search_bet') }}" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Explore Previous Experiments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Statistics Section at Bottom -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-chart-network"></i> Platform Statistics
+            </h3>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-value">{{ stats.active_bets }}</div>
+                <div class="stat-label">Active Bets</div>
+                <div class="lab-emoji stat-icon">🎲</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-value">{{ stats.total_volume | format_token(2) }}</div>
+                <div class="stat-label">Total Volume</div>
+                <div class="lab-emoji stat-icon">💰💎</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-value">{{ stats.total_payouts | format_token(2) }}</div>
+                <div class="stat-label">Total Payouts</div>
+                <div class="lab-emoji stat-icon">💸</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Betting Modal -->
+<div data-bet-modal style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; backdrop-filter: blur(2px);">
+    <div style="display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px;">
+        <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <!-- Modal Header -->
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h5 style="color: var(--text-primary); margin: 0;">
+                    <i class="fas fa-coins"></i> Place Your Bet
+                </h5>
+                <button type="button" data-close-modal style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div style="padding: 1.5rem; color: var(--text-primary);">
+                <!-- Bet Details -->
+                <div style="margin-bottom: 1rem;">
+                    <h6 style="color: var(--success); margin-bottom: 0.5rem;">Betting On:</h6>
+                    <div data-bet-option-display style="padding: 1rem; background: var(--surface-bg); border-radius: 8px; border-left: 3px solid var(--success);">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Betting Form -->
+                <div data-betting-form>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Bet Amount:</label>
+                        <div style="display: flex; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <input type="number" name="bet-amount" style="flex: 1; padding: 0.75rem; background: var(--surface-bg); border: none; color: var(--text-primary);" step="0.000001" min="0">
+                            <span style="padding: 0.75rem; background: var(--border-color); color: var(--text-primary); border-left: 1px solid var(--border-color);">OSMO</span>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Enter amount in OSMO</small>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Bet Option:</label>
+                        <div data-bet-options>
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Your Balance:</label>
+                        <div data-wallet-balance style="color: var(--success); font-weight: 600;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Transaction Status -->
+                    <div data-transaction-status style="display: none;">
+                        <!-- Will show transaction progress -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" data-close-modal class="btn btn-secondary">Cancel</button>
+                <button type="button" data-submit-bet class="btn btn-success" disabled>
+                    <i class="fas fa-check"></i> Confirm Bet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-scroll when bet cards are expanded
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all collapsible bet details
+    const betDetails = document.querySelectorAll('[id^="bet-details-"]');
+    
+    betDetails.forEach(function(betDetail) {
+        betDetail.addEventListener('shown.bs.collapse', function() {
+            // Get the bet card element
+            const betCard = this.closest('.bet-card');
+            
+            if (betCard) {
+                // Calculate if the expanded content is below the viewport
+                const cardRect = betCard.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                
+                // If the bottom of the expanded card is below the viewport, scroll to show it
+                if (cardRect.bottom > viewportHeight) {
+                    // Smooth scroll to bring the entire expanded card into view
+                    betCard.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'nearest'
+                    });
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

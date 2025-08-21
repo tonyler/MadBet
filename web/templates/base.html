@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MadBet{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="osmosis-particles"></div>
+    <div class="gradient-overlay"></div>
+    
+    <!-- Floating decorative elements -->
+    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="" class="floating-decoration osmo-corner top-right">
+    <img src="{{ url_for('static', filename='background-image.jpg') }}" alt="" class="floating-decoration mad-scientist top-left">
+    <img src="{{ url_for('static', filename='background-new.png') }}" alt="" class="floating-decoration mad-scientist bottom-right">
+    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="" class="floating-decoration osmo-corner bottom-left">
+    
+    <!-- Additional mad scientist decorations -->
+    <img src="{{ url_for('static', filename='GxsroBHXUAAYfSz.png') }}" alt="" class="floating-decoration mad-scientist-extra mid-left">
+    <img src="{{ url_for('static', filename='GyatvYmXcAAKVPv.png') }}" alt="" class="floating-decoration mad-scientist-extra mid-right">
+    <img src="{{ url_for('static', filename='discord-logo-png-transparent.png') }}" alt="" class="floating-decoration discord-logo center-left">
+    <img src="{{ url_for('static', filename='discord-logo-png-transparent.png') }}" alt="" class="floating-decoration discord-logo center-right">
+
+    <!-- Wallet Connect Button - Fixed Position Top Right -->
+    <style>
+    #wallet-connect-container {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 99999 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+    }
+    </style>
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Include wallet manager and betting interface -->
+    <script src="{{ url_for('static', filename='js/wallet-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/betting-interface.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/network-diagnostics.js') }}"></script>
+    
+    <!-- Simple transaction handling (without heavy CosmJS dependencies) -->
+    
+    <!-- Universal Wallet Integration (Keplr + Leap) -->
+    <script>
+        // Universal Wallet Connector (Keplr + Leap)
+        class WalletConnector {
+            constructor() {
+                this.chainId = 'osmosis-1';
+                this.chainInfo = {
+                    chainId: 'osmosis-1',
+                    chainName: 'Osmosis',
+                    rpc: 'https://osmosis-rpc.polkachu.com',
+                    rest: 'https://osmosis-api.polkachu.com',
+                    bip44: {
+                        coinType: 118,
+                    },
+                    bech32Config: {
+                        bech32PrefixAccAddr: 'osmo',
+                        bech32PrefixAccPub: 'osmopub',
+                        bech32PrefixValAddr: 'osmovaloper',
+                        bech32PrefixValPub: 'osmovaloperpub',
+                        bech32PrefixConsAddr: 'osmovalcons',
+                        bech32PrefixConsPub: 'osmovalconspub',
+                    },
+                    currencies: [
+                        {
+                            coinDenom: 'OSMO',
+                            coinMinimalDenom: 'uosmo',
+                            coinDecimals: 6,
+                            coinGeckoId: 'osmosis',
+                        },
+                    ],
+                    feeCurrencies: [
+                        {
+                            coinDenom: 'OSMO',
+                            coinMinimalDenom: 'uosmo',
+                            coinDecimals: 6,
+                            coinGeckoId: 'osmosis',
+                            gasPriceStep: {
+                                low: 0.0025,
+                                average: 0.025,
+                                high: 0.04,
+                            },
+                        },
+                    ],
+                    stakeCurrency: {
+                        coinDenom: 'OSMO',
+                        coinMinimalDenom: 'uosmo',
+                        coinDecimals: 6,
+                        coinGeckoId: 'osmosis',
+                    },
+                };
+                
+                // Wallet state
+                this.isConnected = false;
+                this.address = null;
+                this.balance = null;
+                this.currentWallet = null; // 'keplr' or 'leap'
+                this.walletProvider = null; // Reference to window.keplr or window.leap
+                
+                this.init();
+            }
+
+            // Detect available wallets
+            getAvailableWallets() {
+                const wallets = [];
+                if (window.keplr) {
+                    wallets.push({ id: 'keplr', name: 'Keplr', provider: window.keplr });
+                }
+                if (window.leap) {
+                    wallets.push({ id: 'leap', name: 'Leap', provider: window.leap });
+                }
+                return wallets;
+            }
+
+            async init() {
+                // Check if already connected on page load
+                const isConnected = localStorage.getItem('wallet_connected') === 'true';
+                const lastWallet = localStorage.getItem('selected_wallet');
+                
+                if (isConnected && lastWallet) {
+                    await this.connectToWallet(lastWallet, false);
+                }
+                
+                // Set up event listeners
+                document.getElementById('connect-wallet-btn').addEventListener('click', () => this.showWalletSelection());
+                document.getElementById('disconnect-wallet-btn').addEventListener('click', () => this.disconnectWallet());
+            }
+
+            // Show wallet selection modal
+            showWalletSelection() {
+                const availableWallets = this.getAvailableWallets();
+                
+                if (availableWallets.length === 0) {
+                    alert('No compatible wallets found!\n\nPlease install either:\n• Keplr: https://www.keplr.app/download\n• Leap: https://www.leapwallet.io/download');
+                    return;
+                }
+                
+                if (availableWallets.length === 1) {
+                    // Only one wallet available, connect directly
+                    this.connectToWallet(availableWallets[0].id, true);
+                    return;
+                }
+                
+                // Multiple wallets available, show selection
+                this.createWalletSelectionModal(availableWallets);
+            }
+
+            // Create wallet selection modal
+            createWalletSelectionModal(wallets) {
+                // Remove existing modal if any
+                const existingModal = document.getElementById('wallet-selection-modal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                const modal = document.createElement('div');
+                modal.id = 'wallet-selection-modal';
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0, 0, 0, 0.5); z-index: 10000; 
+                    backdrop-filter: blur(2px); display: flex; 
+                    justify-content: center; align-items: center; padding: 20px;
+                `;
+                
+                const modalContent = document.createElement('div');
+                modalContent.style.cssText = `
+                    background: var(--card-bg); border: 1px solid var(--border-color); 
+                    border-radius: 12px; max-width: 400px; width: 100%; 
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                `;
+                
+                modalContent.innerHTML = `
+                    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                        <h5 style="color: var(--text-primary); margin: 0;">
+                            <i class="fas fa-wallet"></i> Choose Your Wallet
+                        </h5>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        ${wallets.map(wallet => `
+                            <button onclick="window.keplrWallet.connectToWallet('${wallet.id}', true)" 
+                                    style="width: 100%; padding: 1rem; margin-bottom: 1rem; 
+                                           background: var(--surface-bg); border: 1px solid var(--border-color); 
+                                           border-radius: 8px; color: var(--text-primary); cursor: pointer;
+                                           display: flex; align-items: center; gap: 1rem; font-size: 1.1rem;
+                                           transition: all 0.2s ease;" 
+                                    onmouseover="this.style.borderColor='var(--success)'; this.style.background='rgba(0, 255, 136, 0.05)'"
+                                    onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--surface-bg)'">
+                                <i class="fas fa-wallet" style="font-size: 1.5rem; color: var(--success);"></i>
+                                <div>
+                                    <div style="font-weight: 600;">${wallet.name}</div>
+                                    <small style="color: var(--text-muted);">Connect with ${wallet.name} wallet</small>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); text-align: right;">
+                        <button onclick="document.getElementById('wallet-selection-modal').remove()" 
+                                class="btn btn-secondary">Cancel</button>
+                    </div>
+                `;
+                
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
+                
+                // Close on outside click
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                };
+            }
+
+            async connectToWallet(walletId, userInitiated = true) {
+                try {
+                    console.log(`🔗 Connecting to ${walletId} wallet...`);
+                    
+                    // Close wallet selection modal if open
+                    const modal = document.getElementById('wallet-selection-modal');
+                    if (modal) modal.remove();
+                    
+                    // Get wallet provider
+                    const wallet = walletId === 'keplr' ? window.keplr : window.leap;
+                    if (!wallet) {
+                        const walletName = walletId.charAt(0).toUpperCase() + walletId.slice(1);
+                        if (userInitiated) {
+                            alert(`Please install ${walletName} extension first!\n\nDownload from:\n• Keplr: https://www.keplr.app/download\n• Leap: https://www.leapwallet.io/download`);
+                        }
+                        return false;
+                    }
+
+                    // Set current wallet
+                    this.currentWallet = walletId;
+                    this.walletProvider = wallet;
+
+                    // Add/suggest the Osmosis chain configuration
+                    try {
+                        await wallet.experimentalSuggestChain(this.chainInfo);
+                        console.log(`✅ Chain configuration suggested to ${walletId}`);
+                    } catch (error) {
+                        console.warn(`Failed to suggest chain to ${walletId}:`, error);
+                        // Continue anyway - wallet might already have Osmosis configured
+                    }
+
+                    // Enable the chain
+                    await wallet.enable(this.chainId);
+
+                    // Get the offline signer
+                    const offlineSigner = wallet.getOfflineSigner(this.chainId);
+                    const accounts = await offlineSigner.getAccounts();
+                    
+                    if (accounts.length === 0) {
+                        throw new Error('No accounts found');
+                    }
+
+                    this.address = accounts[0].address;
+                    this.isConnected = true;
+
+                    // Get balance
+                    await this.updateBalance();
+
+                    // Update UI
+                    this.updateUI();
+
+                    // Store connection state
+                    localStorage.setItem('wallet_connected', 'true');
+                    localStorage.setItem('selected_wallet', walletId);
+                    localStorage.setItem('last_wallet_address', this.address);
+
+                    // Dispatch custom event for other parts of the app (maintain compatibility)
+                    window.dispatchEvent(new CustomEvent('keplr_connected', {
+                        detail: { 
+                            address: this.address, 
+                            balance: this.balance,
+                            walletType: walletId
+                        }
+                    }));
+
+                    if (userInitiated) {
+                        const walletName = walletId.charAt(0).toUpperCase() + walletId.slice(1);
+                        this.showNotification(`${walletName} wallet connected successfully!`, 'success');
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.error(`Failed to connect ${walletId} wallet:`, error);
+                    if (userInitiated) {
+                        this.showNotification(`Failed to connect wallet: ${error.message}`, 'error');
+                    }
+                    return false;
+                }
+            }
+
+            async updateBalance() {
+                try {
+                    if (!this.address) return;
+
+                    // Try multiple REST endpoints for better reliability
+                    const restEndpoints = [
+                        'https://osmosis-api.polkachu.com',
+                        'https://lcd.osmosis.zone',
+                        'https://rest-osmosis.ecostake.com'
+                    ];
+
+                    let balanceData = null;
+                    
+                    for (const endpoint of restEndpoints) {
+                        try {
+                            const response = await fetch(`${endpoint}/cosmos/bank/v1beta1/balances/${this.address}`);
+                            if (response.ok) {
+                                balanceData = await response.json();
+                                console.log(`✅ Balance fetched from ${endpoint}`);
+                                break;
+                            }
+                        } catch (endpointError) {
+                            console.warn(`❌ Balance fetch failed from ${endpoint}:`, endpointError.message);
+                        }
+                    }
+
+                    if (balanceData) {
+                        const osmoBalance = balanceData.balances.find(coin => coin.denom === 'uosmo');
+                        if (osmoBalance) {
+                            this.balance = (parseInt(osmoBalance.amount) / 1000000).toFixed(2);
+                        } else {
+                            this.balance = '0.00';
+                        }
+                    } else {
+                        throw new Error('All balance endpoints failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to fetch balance from all endpoints:', error);
+                    this.balance = 'Error';
+                }
+            }
+
+            disconnectWallet() {
+                const walletName = this.currentWallet ? this.currentWallet.charAt(0).toUpperCase() + this.currentWallet.slice(1) : 'Wallet';
+                
+                this.isConnected = false;
+                this.address = null;
+                this.balance = null;
+                this.currentWallet = null;
+                this.walletProvider = null;
+                
+                // Update UI
+                this.updateUI();
+                
+                // Clear stored connection state
+                localStorage.removeItem('wallet_connected');
+                localStorage.removeItem('selected_wallet');
+                localStorage.removeItem('last_wallet_address');
+
+                // Dispatch custom event (maintain compatibility)
+                window.dispatchEvent(new CustomEvent('keplr_disconnected'));
+
+                this.showNotification(`${walletName} disconnected`, 'info');
+            }
+
+            updateUI() {
+                const connectBtn = document.getElementById('connect-wallet-btn');
+                const walletInfo = document.getElementById('wallet-info');
+                const addressElement = document.getElementById('wallet-address');
+                const balanceElement = document.getElementById('wallet-balance');
+                const walletTypeElement = document.getElementById('wallet-type-display');
+
+                if (this.isConnected && this.address) {
+                    connectBtn.style.display = 'none';
+                    walletInfo.style.display = 'block';
+                    
+                    // Show which wallet is connected
+                    const walletName = this.currentWallet ? this.currentWallet.charAt(0).toUpperCase() + this.currentWallet.slice(1) : 'Wallet';
+                    const walletIcon = this.currentWallet === 'leap' ? 'fas fa-rocket' : 'fas fa-flask';
+                    walletTypeElement.innerHTML = `<i class="${walletIcon}"></i> ${walletName} Connected`;
+                    
+                    // Format address (show first 6 and last 4 characters)
+                    const shortAddress = this.address.substring(0, 6) + '...' + this.address.substring(this.address.length - 4);
+                    addressElement.textContent = shortAddress;
+                    addressElement.title = this.address; // Full address on hover
+                    
+                    balanceElement.textContent = `${this.balance} OSMO`;
+                } else {
+                    connectBtn.style.display = 'block';
+                    walletInfo.style.display = 'none';
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                // Create a simple notification
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    z-index: 9999;
+                    padding: 1rem 1.5rem;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 500;
+                    max-width: 300px;
+                    word-wrap: break-word;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                
+                // Set background color based on type
+                switch(type) {
+                    case 'success':
+                        notification.style.background = 'linear-gradient(135deg, #00ff88, #00cc6a)';
+                        break;
+                    case 'error':
+                        notification.style.background = 'linear-gradient(135deg, #ff4757, #e53e3e)';
+                        break;
+                    default:
+                        notification.style.background = 'linear-gradient(135deg, #00fff0, #9945ff)';
+                }
+                
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                // Add animation keyframes if not already added
+                if (!document.querySelector('#keplr-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'keplr-animations';
+                    style.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            // Public methods for other parts of the app
+            getAddress() {
+                return this.address;
+            }
+
+            getBalance() {
+                return this.balance;
+            }
+
+            isWalletConnected() {
+                return this.isConnected;
+            }
+
+            async refreshBalance() {
+                if (this.isConnected) {
+                    await this.updateBalance();
+                    this.updateUI();
+                }
+            }
+
+            // Get account info from chain with multiple endpoint fallback
+            async getAccountInfo() {
+                if (!this.address) {
+                    throw new Error('No wallet address available');
+                }
+
+                const restEndpoints = [
+                    'https://osmosis-api.polkachu.com',
+                    'https://lcd.osmosis.zone',
+                    'https://rest-osmosis.ecostake.com'
+                ];
+
+                for (const endpoint of restEndpoints) {
+                    try {
+                        console.log(`📊 Fetching account info from ${endpoint}...`);
+                        const response = await fetch(`${endpoint}/cosmos/auth/v1beta1/accounts/${this.address}`);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.account) {
+                                const accountInfo = {
+                                    accountNumber: parseInt(data.account.account_number || 0),
+                                    sequence: parseInt(data.account.sequence || 0)
+                                };
+                                console.log(`✅ Account info retrieved from ${endpoint}:`, accountInfo);
+                                return accountInfo;
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`❌ Failed to get account info from ${endpoint}:`, error.message);
+                    }
+                }
+
+                console.warn('⚠️ Could not get account info from any endpoint, using defaults');
+                return { accountNumber: 0, sequence: 0 };
+            }
+
+            // Create and sign a bet transaction using Keplr's built-in sendTx method
+            async createBetTransaction(escrowAddress, amount, memo = '') {
+                if (!this.isConnected || !this.walletProvider) {
+                    throw new Error('Wallet not connected');
+                }
+
+                // Validate inputs
+                if (!escrowAddress || !escrowAddress.startsWith('osmo')) {
+                    throw new Error('Invalid escrow address');
+                }
+                
+                if (amount <= 0) {
+                    throw new Error('Invalid bet amount');
+                }
+
+                try {
+                    console.log(`💰 Creating bet transaction: ${amount} OSMO to ${escrowAddress}`);
+                    
+                    // Convert OSMO to uOSMO (micro units)
+                    const amountInMicroOsmo = Math.floor(amount * 1000000);
+                    
+                    console.log(`💰 Transaction details:`, {
+                        from: this.address,
+                        to: escrowAddress,
+                        amount: `${amount} OSMO (${amountInMicroOsmo} uOSMO)`,
+                        memo: memo
+                    });
+                    
+                    // Suggest reliable chain configuration to override Keplr's default endpoints
+                    console.log('🔗 Suggesting reliable Osmosis chain configuration...');
+                    try {
+                        const reliableChainConfig = {
+                            chainId: 'osmosis-1',
+                            chainName: 'Osmosis',
+                            rpc: 'https://osmosis-rpc.polkachu.com',
+                            rest: 'https://osmosis-api.polkachu.com',
+                            bip44: {
+                                coinType: 118,
+                            },
+                            bech32Config: {
+                                bech32PrefixAccAddr: 'osmo',
+                                bech32PrefixAccPub: 'osmopub',
+                                bech32PrefixValAddr: 'osmovaloper',
+                                bech32PrefixValPub: 'osmovaloperpub',
+                                bech32PrefixConsAddr: 'osmovalcons',
+                                bech32PrefixConsPub: 'osmovalconspub',
+                            },
+                            currencies: [
+                                {
+                                    coinDenom: 'OSMO',
+                                    coinMinimalDenom: 'uosmo',
+                                    coinDecimals: 6,
+                                    coinGeckoId: 'osmosis',
+                                },
+                            ],
+                            feeCurrencies: [
+                                {
+                                    coinDenom: 'OSMO',
+                                    coinMinimalDenom: 'uosmo',
+                                    coinDecimals: 6,
+                                    coinGeckoId: 'osmosis',
+                                    gasPriceStep: {
+                                        low: 0.0025,
+                                        average: 0.025,
+                                        high: 0.04,
+                                    },
+                                },
+                            ],
+                            stakeCurrency: {
+                                coinDenom: 'OSMO',
+                                coinMinimalDenom: 'uosmo',
+                                coinDecimals: 6,
+                                coinGeckoId: 'osmosis',
+                            },
+                        };
+                        
+                        await this.walletProvider.experimentalSuggestChain(reliableChainConfig);
+                        console.log('✅ Reliable chain configuration suggested successfully');
+                    } catch (error) {
+                        console.warn('⚠️ Could not suggest chain configuration:', error.message);
+                        // Continue anyway - might still work
+                    }
+
+                    // Enable chain if not already enabled
+                    await this.walletProvider.enable(this.chainId);
+
+                    // Check available Keplr methods
+                    console.log('🔍 Available Keplr methods:', Object.keys(this.walletProvider).filter(key => typeof this.walletProvider[key] === 'function'));
+                    
+                    // Use manual signing + Keplr broadcasting (more reliable)
+                    console.log('📝 Using manual signing with Keplr broadcasting...');
+                    
+                    // Get the offline signer
+                    const offlineSigner = this.walletProvider.getOfflineSigner(this.chainId);
+                    const accounts = await offlineSigner.getAccounts();
+                    
+                    if (accounts.length === 0) {
+                        throw new Error('No accounts found in wallet');
+                    }
+
+                    // Get account info (account number and sequence)
+                    const accountInfo = await this.getAccountInfo();
+                    
+                    // Create the transaction message
+                    const msg = {
+                        type: 'cosmos-sdk/MsgSend',
+                        value: {
+                            from_address: this.address,
+                            to_address: escrowAddress,
+                            amount: [{
+                                denom: 'uosmo',
+                                amount: amountInMicroOsmo.toString()
+                            }]
+                        }
+                    };
+
+                    // Create the transaction fee
+                    const fee = {
+                        amount: [{
+                            denom: 'uosmo',
+                            amount: '7500'
+                        }],
+                        gas: '200000'
+                    };
+
+                    // Create the transaction document to sign
+                    const txDoc = {
+                        chain_id: this.chainId,
+                        account_number: accountInfo.accountNumber.toString(),
+                        sequence: accountInfo.sequence.toString(),
+                        fee: fee,
+                        msgs: [msg],
+                        memo: memo
+                    };
+
+                    console.log('📝 Signing transaction:', txDoc);
+
+                    // Sign the transaction using Keplr
+                    const signResult = await offlineSigner.signAmino(this.address, txDoc);
+                    console.log('✅ Transaction signed successfully:', signResult);
+                    
+                    // Broadcast using reliable backend service (bypass Keplr's unreliable endpoints)
+                    console.log('📡 Broadcasting via reliable backend service...');
+                    
+                    try {
+                        // Create proper StdTx format for amino JSON
+                        const stdTx = {
+                            type: "cosmos-sdk/StdTx",
+                            value: {
+                                msg: signResult.signed.msgs,
+                                fee: signResult.signed.fee,
+                                signatures: [signResult.signature],
+                                memo: signResult.signed.memo,
+                                timeout_height: "0"
+                            }
+                        };
+                        
+                        // Encode to base64 for protobuf transmission
+                        const tx_bytes = btoa(JSON.stringify(stdTx));
+                        
+                        const signedTxData = {
+                            tx_bytes: tx_bytes
+                        };
+                        
+                        console.log('📝 Sending signed transaction to backend for broadcasting...');
+                        console.log('📝 StdTx format:', JSON.stringify(stdTx, null, 2));
+                        
+                        // Send to backend for broadcasting
+                        const response = await fetch('/api/broadcast-transaction', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(signedTxData)
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Backend broadcast failed: ${errorText}`);
+                        }
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            console.log('✅ Backend broadcast successful:', result);
+                            return {
+                                success: true,
+                                transactionHash: result.transactionHash,
+                                height: result.height || 0,
+                                gasUsed: result.gasUsed || '200000'
+                            };
+                        } else {
+                            throw new Error(result.error || 'Backend broadcast failed');
+                        }
+                        
+                    } catch (backendError) {
+                        console.error('❌ Backend broadcast failed:', backendError);
+                        throw new Error(`Transaction broadcast failed: ${backendError.message}`);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Failed to create/sign transaction:', error);
+                    
+                    let errorMessage = error.message;
+                    if (errorMessage.includes('user rejected') || errorMessage.includes('User rejected')) {
+                        errorMessage = 'Transaction was rejected by user';
+                    } else if (errorMessage.includes('insufficient funds') || errorMessage.includes('Insufficient funds')) {
+                        errorMessage = 'Insufficient funds for transaction';
+                    } else if (errorMessage.includes('gas')) {
+                        errorMessage = 'Gas estimation failed - please try again';
+                    } else {
+                        errorMessage = `Transaction failed: ${errorMessage}. Please try again.`;
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+            }
+
+            
+            
+            // Transaction verification helper with multiple endpoints
+            async verifyTransaction(txHash) {
+                if (!txHash) {
+                    return { verified: false, reason: 'Invalid transaction hash' };
+                }
+                
+                const restEndpoints = [
+                    'https://osmosis-api.polkachu.com',
+                    'https://lcd.osmosis.zone',
+                    'https://rest-osmosis.ecostake.com'
+                ];
+                
+                for (const endpoint of restEndpoints) {
+                    try {
+                        console.log(`🔍 Verifying transaction ${txHash} on ${endpoint}`);
+                        const response = await fetch(`${endpoint}/cosmos/tx/v1beta1/txs/${txHash}`);
+                        
+                        if (response.ok) {
+                            const txData = await response.json();
+                            console.log(`✅ Transaction verified on ${endpoint}`);
+                            return { 
+                                verified: true, 
+                                transaction: txData.tx_response,
+                                height: txData.tx_response.height,
+                                endpoint: endpoint
+                            };
+                        }
+                    } catch (error) {
+                        console.warn(`❌ Verification failed on ${endpoint}:`, error.message);
+                    }
+                }
+                
+                return { verified: false, reason: 'Transaction not found on any endpoint' };
+            }
+        }
+
+        // Initialize Universal Wallet Connector when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            window.keplrWallet = new WalletConnector(); // Keep the same name for compatibility
+        });
+
+        // Listen for wallet keystore change events (both Keplr and Leap)
+        window.addEventListener('keplr_keystorechange', () => {
+            console.log('🔄 Keplr keystore changed - checking wallet connection');
+            if (window.keplrWallet && window.keplrWallet.isWalletConnected() && window.keplrWallet.currentWallet === 'keplr') {
+                // Reconnect with Keplr
+                window.keplrWallet.connectToWallet('keplr', false);
+            }
+        });
+        
+        window.addEventListener('leap_keystorechange', () => {
+            console.log('🔄 Leap keystore changed - checking wallet connection');
+            if (window.keplrWallet && window.keplrWallet.isWalletConnected() && window.keplrWallet.currentWallet === 'leap') {
+                // Reconnect with Leap
+                window.keplrWallet.connectToWallet('leap', false);
+            }
+        });
+        
+        // Additional listeners for direct wallet events (more reliable)
+        setTimeout(() => {
+            if (window.keplr) {
+                window.keplr.addEventListener('keplr_keystorechange', () => {
+                    console.log('🔄 Keplr direct account change detected');
+                    if (window.keplrWallet && window.keplrWallet.isWalletConnected() && window.keplrWallet.currentWallet === 'keplr') {
+                        setTimeout(() => {
+                            window.keplrWallet.connectToWallet('keplr', false);
+                        }, 500);
+                    }
+                });
+            }
+            
+            if (window.leap) {
+                window.leap.addEventListener('leap_keystorechange', () => {
+                    console.log('🔄 Leap direct account change detected');
+                    if (window.keplrWallet && window.keplrWallet.isWalletConnected() && window.keplrWallet.currentWallet === 'leap') {
+                        setTimeout(() => {
+                            window.keplrWallet.connectToWallet('leap', false);
+                        }, 500);
+                    }
+                });
+            }
+        }, 1000);
+        
+        // Periodic wallet address monitoring (fallback)
+        setInterval(() => {
+            if (window.keplrWallet && window.keplrWallet.isWalletConnected()) {
+                try {
+                    const currentAddress = window.keplrWallet.getAddress();
+                    const previousAddress = localStorage.getItem('last_wallet_address');
+                    
+                    if (previousAddress && previousAddress !== currentAddress) {
+                        console.log('🔄 Wallet address change detected via monitoring');
+                        localStorage.setItem('last_wallet_address', currentAddress);
+                        
+                        // Trigger wallet connected event to handle address change
+                        window.dispatchEvent(new CustomEvent('keplr_connected', {
+                            detail: { 
+                                address: currentAddress, 
+                                balance: window.keplrWallet.getBalance(),
+                                walletType: window.keplrWallet.currentWallet,
+                                addressChanged: true 
+                            }
+                        }));
+                    } else if (currentAddress) {
+                        localStorage.setItem('last_wallet_address', currentAddress);
+                    }
+                } catch (error) {
+                    console.error('Error monitoring wallet address:', error);
+                }
+            }
+        }, 2000); // Check every 2 seconds
+    </script>
+    
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

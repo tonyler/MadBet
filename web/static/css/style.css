@@ -1,0 +1,1473 @@
+/* Modern Dark Theme CSS - Mad Scientists Style */
+
+:root {
+    /* Web3/DeFi color palette with neon accents */
+    --primary-bg: #0D0F14;
+    --secondary-bg: #151922;
+    --card-bg: #1B1F2A;
+    --surface-bg: #242938;
+    --accent-primary: #00FFF0;
+    --accent-secondary: #FF3366;
+    --accent-tertiary: #FFD700;
+    --accent-quaternary: #9945FF;
+    --success: #10B981;
+    --warning: #FFAA00;
+    --error: #FF4757;
+    --text-primary: #E8E8E8;
+    --text-secondary: #B0B8C3;
+    --text-muted: #6B7280;
+    --border-color: #2D3748;
+    --border-light: #4A5568;
+    
+    /* Web3/DeFi Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-quaternary));
+    --gradient-secondary: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));
+    --gradient-success: linear-gradient(135deg, var(--success), #059669);
+    --gradient-warning: linear-gradient(135deg, var(--warning), #FF8800);
+    --gradient-error: linear-gradient(135deg, var(--error), #E53E3E);
+    --gradient-card: linear-gradient(135deg, rgba(27, 31, 42, 0.9), rgba(36, 41, 56, 0.7));
+    --gradient-neon: linear-gradient(135deg, #00FFF0, #9945FF, #FF3366);
+    --gradient-osmosis: linear-gradient(135deg, #00FFF0, #FF6B6B, #4ECDC4, #9945FF);
+    --gradient-lab: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+    
+    /* Web3 Neon Shadows & Glows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 30px rgba(0, 255, 240, 0.2);
+    --shadow-glow-purple: 0 0 30px rgba(153, 69, 255, 0.4);
+    --shadow-glow-pink: 0 0 30px rgba(255, 51, 102, 0.4);
+    --shadow-glow-gold: 0 0 30px rgba(255, 215, 0, 0.4);
+    
+    /* Web3 Typography */
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', 'Menlo', 'Consolas', monospace;
+    --font-sans: 'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heading: 'Space Grotesk', 'Inter', sans-serif;
+    --font-tech: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    position: relative;
+    margin: 0;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mad scientist lab background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        /* Circuit board pattern */
+        radial-gradient(circle at 20% 20%, rgba(0, 255, 240, 0.08) 2px, transparent 2px),
+        radial-gradient(circle at 80% 80%, rgba(153, 69, 255, 0.08) 2px, transparent 2px),
+        radial-gradient(circle at 40% 60%, rgba(255, 51, 102, 0.08) 1px, transparent 1px),
+        /* Grid lines for lab feel */
+        linear-gradient(90deg, rgba(0, 255, 240, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(153, 69, 255, 0.03) 1px, transparent 1px),
+        /* Base dark lab background */
+        linear-gradient(135deg, #0a0c10 0%, #0d0f14 25%, #111318 50%, #0d0f14 75%, #0a0c10 100%);
+    background-size: 
+        200px 200px,
+        300px 300px, 
+        150px 150px,
+        50px 50px,
+        50px 50px,
+        100% 100%;
+    pointer-events: none;
+    z-index: -2;
+}
+
+/* Animated gradient overlay */
+.gradient-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(0, 255, 240, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(153, 69, 255, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 50% 10%, rgba(255, 51, 102, 0.10) 0%, transparent 40%),
+        radial-gradient(circle at 30% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 70% 30%, rgba(0, 255, 136, 0.12) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+    animation: osmosis-flow 12s ease-in-out infinite;
+}
+
+/* Add a dark overlay to make the background image subtle */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 15, 20, 0.85);
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes osmosis-flow {
+    0%, 100% { 
+        opacity: 0.6;
+        transform: scale(1) rotate(0deg);
+    }
+    20% { 
+        opacity: 0.8;
+        transform: scale(1.01) rotate(1deg);
+    }
+    40% { 
+        opacity: 1;
+        transform: scale(1.02) rotate(-1deg);
+    }
+    60% { 
+        opacity: 0.9;
+        transform: scale(1.01) rotate(2deg);
+    }
+    80% { 
+        opacity: 0.7;
+        transform: scale(1.03) rotate(-0.5deg);
+    }
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Navbar styling */
+.navbar {
+    background: rgba(26, 26, 30, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: none;
+    box-shadow: var(--shadow-lg);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.8rem;
+    background: var(--gradient-osmosis);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(0, 255, 240, 0.5);
+    animation: osmosis-brand-glow 4s ease-in-out infinite;
+}
+
+@keyframes osmosis-brand-glow {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+        filter: hue-rotate(0deg);
+    }
+    25% { 
+        opacity: 0.9; 
+        transform: scale(1.02);
+        filter: hue-rotate(30deg);
+    }
+    50% { 
+        opacity: 0.8; 
+        transform: scale(1.01);
+        filter: hue-rotate(60deg);
+    }
+    75% { 
+        opacity: 0.95; 
+        transform: scale(1.01);
+        filter: hue-rotate(30deg);
+    }
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    margin: 0 6px;
+    padding: 10px 20px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.navbar-light .navbar-nav .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link.active {
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.navbar-light .navbar-nav .nav-link:hover::before {
+    opacity: 0.1;
+}
+
+.navbar-text {
+    color: var(--text-muted) !important;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+}
+
+/* Card enhancements - Web3 Style */
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gradient-neon);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card:hover::after {
+    opacity: 0.8;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-primary);
+}
+
+.card-header {
+    border-radius: 16px 16px 0 0 !important;
+    border: none;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(29, 181, 132, 0.15));
+    color: var(--text-primary);
+    padding: 1.5rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(124, 58, 237, 0.1));
+    z-index: 0;
+}
+
+.card-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+.card-body {
+    padding: 1.5rem 1.5rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.card-footer {
+    border: none;
+    background: var(--surface-bg);
+    border-radius: 0 0 16px 16px;
+    border-top: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 1em;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-family: var(--font-condensed);
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-success {
+    background: var(--gradient-success);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.badge-warning {
+    background: var(--gradient-warning);
+    color: var(--primary-bg);
+    box-shadow: var(--shadow-md);
+}
+
+.badge-danger {
+    background: var(--gradient-error);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.badge-live {
+    background: var(--gradient-success);
+    color: var(--text-primary);
+    animation: neon-pulse 2s infinite;
+    box-shadow: var(--shadow-glow);
+    border: 1px solid var(--success);
+}
+
+@keyframes neon-pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        border-color: var(--success);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.9);
+        border-color: var(--accent-primary);
+    }
+}
+
+/* Profit/Loss styling */
+.profit-positive {
+    color: var(--success) !important;
+    font-weight: 600;
+}
+
+.profit-negative {
+    color: var(--error) !important;
+    font-weight: 600;
+}
+
+.profit-neutral {
+    color: var(--text-muted) !important;
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-family: var(--font-condensed);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+/* Button variants - Web3 Style */
+.btn-primary {
+    background: linear-gradient(135deg, #00ff88, #00cc6a, #1db584);
+    color: var(--text-primary);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    border: 1px solid #00ff88;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.6), var(--shadow-lg);
+    background: linear-gradient(135deg, #00cc6a, #1db584, #0ea574);
+    border-color: #00cc6a;
+    transform: scale(1.05);
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: var(--text-primary);
+}
+
+.btn-warning {
+    background: var(--gradient-warning);
+    color: var(--primary-bg);
+}
+
+.btn-danger {
+    background: var(--gradient-error);
+    color: var(--text-primary);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--accent-primary);
+    color: var(--primary-bg);
+}
+
+/* Forms */
+.form-control {
+    background: var(--surface-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: var(--card-bg);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    color: var(--text-primary);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.input-group-text {
+    background: var(--surface-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 12px 0 0 12px;
+}
+
+/* Search container - Web3 Style */
+.search-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.search-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+}
+
+@keyframes neon-flow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Modern Bet Card Styling */
+.bet-card {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.bet-card.active {
+    border-left: 3px solid var(--success);
+}
+
+.bet-card.completed {
+    border-left: 3px solid var(--accent-primary);
+}
+
+.bet-card.cancelled {
+    border-left: 3px solid var(--warning);
+    opacity: 0.8;
+}
+
+
+
+.bet-metadata {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(27, 31, 42, 0.6), rgba(36, 41, 56, 0.4));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1rem;
+}
+
+.bet-metadata .item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.2s ease;
+}
+
+.bet-metadata .item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-1px);
+}
+
+.bet-metadata .item i {
+    color: var(--success);
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.bet-metadata .item strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.bet-options {
+    margin: 2rem 0;
+}
+
+.bet-options h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.bet-option {
+    background: linear-gradient(135deg, rgba(36, 41, 56, 0.8), rgba(27, 31, 42, 0.6));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.bet-option:hover {
+    border-color: var(--success);
+    background: linear-gradient(135deg, rgba(36, 41, 56, 0.9), rgba(27, 31, 42, 0.7));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.bet-option.winning {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border-color: var(--success);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.bet-option.winning::before {
+    content: '🏆';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.option-name {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.option-name strong {
+    color: var(--success);
+    margin-right: 0.5rem;
+}
+
+.option-progress {
+    background: rgba(255, 255, 255, 0.1);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.option-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), rgba(16, 185, 129, 0.7));
+    transition: width 0.5s ease;
+    border-radius: 3px;
+}
+
+/* Participants section styling */
+.bet-participants {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.bet-participants h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Entry cost styling */
+.entry-cost {
+    line-height: 1.2;
+}
+
+.token-inline-small {
+    width: 14px;
+    height: 14px;
+    margin-left: 3px;
+    vertical-align: text-top;
+}
+
+/* Remove number input spinners/arrows */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Discord join link styling - badge style like LIVE badge */
+.discord-join-link {
+    display: flex;
+    align-items: center;
+}
+
+.discord-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: linear-gradient(135deg, #5865F2, #4752C4);
+    color: white !important;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
+    border: 2px solid rgba(88, 101, 242, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.discord-link:hover {
+    background: linear-gradient(135deg, #4752C4, #3c45a6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.5);
+    border-color: rgba(88, 101, 242, 0.6);
+    color: white !important;
+    text-decoration: none;
+}
+
+.discord-link i {
+    font-size: 1rem;
+}
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.option-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.option-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.option-progress {
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.option-progress-bar {
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+}
+
+.bet-participants {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.participant {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.participant:last-child {
+    border-bottom: none;
+}
+
+.participant-name {
+    font-weight: 500;
+    color: var(--accent-primary);
+}
+
+.participant-amount {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Statistics Cards */
+.stat-card {
+    text-align: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--success) !important;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 106, 0.05)) !important;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    opacity: 0.05;
+    z-index: 0;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover::before {
+    background: linear-gradient(135deg, var(--success), #00cc6a) !important;
+    opacity: 0.15 !important;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-condensed);
+    letter-spacing: 1px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-condensed);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    opacity: 0.1;
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    z-index: 0;
+    color: var(--accent-primary);
+}
+
+/* OSMO Logo styling */
+.osmo-logo {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.osmo-icon {
+    width: 60px;
+    height: 60px;
+    opacity: 0.15;
+    filter: brightness(1.2) saturate(1.5) drop-shadow(0 0 5px rgba(0, 255, 240, 0.3));
+}
+
+.lab-emoji.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.4 !important;
+    position: absolute;
+    top: 45%;
+    right: 15%;
+    transform: translateY(-50%);
+    z-index: 0;
+    color: var(--accent-primary);
+}
+
+.token-inline {
+    width: 1em;
+    height: 1em;
+    margin-left: 0.05em;
+    vertical-align: -0.1em;
+    display: inline;
+    object-fit: contain;
+    object-position: center;
+}
+
+/* Keep backward compatibility */
+.osmo-token-inline {
+    width: 1em;
+    height: 1em;
+    margin-left: 0.05em;
+    vertical-align: -0.1em;
+    display: inline;
+    object-fit: contain;
+    object-position: center;
+}
+
+/* Web3 Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: 0.8px;
+}
+
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(0, 255, 240, 0.3);
+}
+
+/* Token amounts */
+.token-amount {
+    font-family: var(--font-tech);
+    font-weight: 600;
+    color: var(--accent-primary);
+    text-shadow: 0 0 8px rgba(0, 255, 240, 0.4);
+}
+
+.bet-question {
+    font-family: var(--font-heading) !important;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    line-height: 1.3;
+    letter-spacing: 0.5px;
+}
+
+/* Text utilities */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-light {
+    color: var(--text-secondary) !important;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Footer */
+footer {
+    background: var(--card-bg) !important;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    margin-top: 3rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .bet-metadata {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .option-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .option-stats {
+        align-self: flex-end;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .search-container {
+        padding: 1.5rem;
+    }
+    
+    .bet-card .card-body {
+        padding: 1rem;
+    }
+    
+    .stat-card {
+        margin-bottom: 2.5rem;
+    }
+}
+
+
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-bg);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
+}
+
+/* Discord-like styling touches */
+.discord-username {
+    font-weight: 600;
+    color: var(--accent-primary);
+}
+
+.tx-link {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+/* Osmosis-themed enhancements */
+.osmosis-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.osmosis-particles::before,
+.osmosis-particles::after {
+    content: '💫';
+    position: absolute;
+    animation: osmosis-float 15s infinite linear;
+    opacity: 0.3;
+    font-size: 1.2rem;
+}
+
+.osmosis-particles::before {
+    top: -50px;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.osmosis-particles::after {
+    top: -50px;
+    left: 80%;
+    animation-delay: 8s;
+}
+
+@keyframes osmosis-float {
+    0% {
+        transform: translateY(-50px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Enhanced lab emoji effects */
+.lab-emoji {
+    animation: gentle-pulse 4s infinite ease-in-out;
+}
+
+/* Enhanced Bet Button Styling */
+.place-bet-btn {
+    background: linear-gradient(135deg, #00CC6A, #008A4A, #005C32) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid #00CC6A !important;
+    box-shadow: 0 0 20px rgba(0, 204, 106, 0.6), 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 600 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.place-bet-btn:hover {
+    background: linear-gradient(135deg, #00FF88, #00CC6A, #008A4A) !important;
+    color: var(--text-primary) !important;
+    border-color: #00FF88 !important;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+.place-bet-btn:active {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.7), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.place-bet-btn:disabled {
+    background: linear-gradient(135deg, #4A5568, #2D3748) !important;
+    color: var(--text-muted) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    opacity: 0.6 !important;
+}
+
+/* Bet button glow animation for extra visibility */
+.place-bet-btn:not(:disabled) {
+    animation: bet-button-glow 3s ease-in-out infinite;
+}
+
+@keyframes bet-button-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 204, 106, 0.6), 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Betting Modal Z-Index Fix */
+#bettingModal.modal {
+    z-index: 1055 !important;
+}
+
+#bettingModal .modal-backdrop {
+    z-index: 1054 !important;
+}
+
+#bettingModal .modal-dialog {
+    z-index: 1056 !important;
+}
+
+#bettingModal .modal-content {
+    z-index: 1057 !important;
+}
+
+/* Ensure modal is interactable */
+.modal-content * {
+    pointer-events: auto !important;
+}
+
+.modal.show {
+    pointer-events: auto !important;
+}
+
+
+
+/* Osmosis-themed bet card enhancements */
+.bet-card:hover {
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 240, 0.05) 0%, 
+        rgba(153, 69, 255, 0.05) 50%, 
+        rgba(255, 51, 102, 0.05) 100%);
+}
+
+/* Enhanced search container with osmosis theme */
+.search-container {
+    background: linear-gradient(135deg, 
+        rgba(27, 31, 42, 0.95) 0%, 
+        rgba(36, 41, 56, 0.95) 50%, 
+        rgba(27, 31, 42, 0.95) 100%);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Collapsible bet card enhancements */
+.card-header[role="button"] {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.card-header[role="button"]:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.6));
+    transform: translateY(-1px);
+}
+
+.collapse-toggle {
+    transition: transform 0.3s ease;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+.card-header[aria-expanded="false"] .collapse-toggle {
+    transform: rotate(-90deg);
+}
+
+.card-header[aria-expanded="true"] .collapse-toggle {
+    transform: rotate(0deg);
+}
+
+.collapse-toggle:hover {
+    color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
+.card-header[aria-expanded="false"] .collapse-toggle:hover {
+    transform: rotate(-90deg) scale(1.1);
+}
+
+/* Smooth collapse animation */
+.collapse {
+    transition: height 0.35s ease;
+}
+
+.collapsing {
+    transition: height 0.35s ease;
+}
+
+.search-container::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--gradient-osmosis);
+    z-index: -1;
+    border-radius: 22px;
+    opacity: 0.3;
+
+}
+
+
+
+/* Brand header styling */
+.brand-header {
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.main-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 20px rgba(0, 255, 240, 0.4));
+    animation: gentle-float 6s ease-in-out infinite;
+}
+
+@keyframes gentle-float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Empty state enhancements */
+.empty-state-card {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    min-width: 800px; !important
+}
+
+.empty-state-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/static/background-banner.jpg') center/cover no-repeat;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+@media (max-width: 768px) {
+    .empty-state-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .empty-state-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .empty-state-card {
+        padding: 1.5rem;
+    }
+}
+
+.empty-state-logo {
+    width: 60px;
+    height: 60px;
+    filter: drop-shadow(0 0 15px rgba(0, 255, 240, 0.6));
+    animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Floating decorative elements */
+.floating-decoration {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(0.5px);
+}
+
+/* Osmo logo corners - more transparent */
+.floating-decoration.osmo-corner {
+    opacity: 0.12;
+    width: 80px;
+    height: 80px;
+}
+
+.floating-decoration.osmo-corner.top-right {
+    top: 5%;
+    right: 5%;
+    animation: gentle-float 8s ease-in-out infinite;
+}
+
+.floating-decoration.osmo-corner.bottom-left {
+    bottom: 5%;
+    left: 5%;
+    animation: gentle-float 10s ease-in-out infinite reverse;
+}
+
+/* Mad scientist image corners - very transparent */
+.floating-decoration.mad-scientist {
+    opacity: 0.08;
+    width: 120px;
+    height: 120px;
+    border-radius: 15px;
+    filter: blur(1px) grayscale(30%);
+}
+
+.floating-decoration.mad-scientist.top-left {
+    top: 8%;
+    left: 3%;
+    animation: gentle-float 12s ease-in-out infinite;
+}
+
+.floating-decoration.mad-scientist.bottom-right {
+    bottom: 8%;
+    right: 3%;
+    animation: gentle-float 14s ease-in-out infinite reverse;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--secondary-bg);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--success), rgba(16, 185, 129, 0.7));
+    border-radius: 6px;
+    border: 2px solid var(--secondary-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--success), rgba(16, 185, 129, 0.9));
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--secondary-bg);
+}
+
+/* Firefox Scrollbar */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--success) var(--secondary-bg);
+}
+
+/* Additional floating decorations */
+.floating-decoration.mad-scientist-extra {
+    opacity: 0.06;
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    filter: blur(0.8px) grayscale(20%);
+}
+
+.floating-decoration.mad-scientist-extra.mid-left {
+    top: 50%;
+    left: 2%;
+    transform: translateY(-50%);
+    animation: gentle-float 16s ease-in-out infinite;
+}
+
+.floating-decoration.mad-scientist-extra.mid-right {
+    top: 50%;
+    right: 2%;
+    transform: translateY(-50%);
+    animation: gentle-float 18s ease-in-out infinite reverse;
+}
+
+
+.floating-decoration.discord-logo {
+    opacity: 0.05;
+    width: 70px;
+    height: 70px;
+    border-radius: 15px;
+    filter: blur(1px) hue-rotate(30deg);
+}
+
+.floating-decoration.discord-logo.center-left {
+    top: 35%;
+    left: 8%;
+    animation: gentle-float 13s ease-in-out infinite;
+}
+
+.floating-decoration.discord-logo.center-right {
+    top: 65%;
+    right: 8%;
+    animation: gentle-float 15s ease-in-out infinite reverse;
+}
+

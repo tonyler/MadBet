@@ -1,0 +1,72 @@
+# Environment files containing sensitive information
+.env*
+*.env
+
+# Node modules
+node_modules/
+osmjs-service/node_modules/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.backup_*
+*~
+
+# Private keys and sensitive data
+*.key
+*.pem
+private_keys/
+secrets/
+
+# 🔑 CRITICAL: Wallet & User Data (NEVER COMMIT)
+data/user_wallets.json
+data/private_keys.json
+data/mnemonics.json
+data/bets_data.json
+
+# 🔐 Environment & Config
+config.py
+config.ini
+config.json
+settings.json
+secrets.json
+
+# Configuration backups
+config.backup
+settings.backup

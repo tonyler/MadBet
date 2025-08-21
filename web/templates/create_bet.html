@@ -1,0 +1,742 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Bet - MadBet{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Brand Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="brand-header text-center mb-4">
+                <div class="brand-logo mb-3">
+                    <h1 class="display-4 mb-2">
+                        🧪 Create New Experiment
+                    </h1>
+                </div>
+                <p class="lead text-muted">
+                    Set up a new betting experiment for others to join
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bet Creation Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> New Betting Experiment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="create-bet-form">
+                        <!-- Optional Creator Name -->
+                        <div class="mb-3">
+                            <label for="creator-name" class="form-label">
+                                <i class="fas fa-user"></i> Creator Name (Optional)
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="creator-name" 
+                                name="creator_name" 
+                                maxlength="50" 
+                                placeholder="Anonymous (leave empty for anonymous)">
+                            <div class="form-text">
+                                Your name will be shown as the bet creator. Leave empty to be "Anonymous".
+                            </div>
+                        </div>
+
+                        <!-- Question -->
+                        <div class="mb-3">
+                            <label for="bet-question" class="form-label">
+                                <i class="fas fa-question-circle"></i> Bet Question
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="bet-question" 
+                                name="question" 
+                                rows="3" 
+                                maxlength="200" 
+                                required 
+                                placeholder="What question do you want people to bet on? (max 200 characters)"></textarea>
+                            <div class="form-text">
+                                <span id="question-counter">0</span>/200 characters
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="mb-3">
+                            <label for="bet-options" class="form-label">
+                                <i class="fas fa-list-ul"></i> Betting Options
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="bet-options" 
+                                name="options" 
+                                rows="4" 
+                                required 
+                                placeholder="Enter betting options separated by commas (e.g., Option A, Option B, Option C)"></textarea>
+                            <div class="form-text">
+                                Separate options with commas. Min 2, max 5 options. Each option max 100 characters.
+                            </div>
+                            <div id="options-preview" class="mt-2" style="display: none;">
+                                <strong>Preview:</strong>
+                                <ul id="options-list"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Bet Amount -->
+                        <div class="mb-3">
+                            <label for="bet-amount" class="form-label">
+                                <i class="fas fa-coins"></i> Fixed Bet Amount
+                            </label>
+                            <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="form-control" 
+                                    id="bet-amount" 
+                                    name="bet_amount" 
+                                    min="0.1" 
+                                    step="any" 
+                                    required
+                                <div class="token-dropdown" style="max-width: 100px;">
+                                    <select class="form-select d-none" id="bet-token" name="token">
+                                        <option value="osmo">OSMO</option>
+                                        <option value="lab">LAB</option>
+                                    </select>
+                                    <div class="token-select-display" id="token-display">
+                                        <div class="token-option active" data-value="osmo">
+                                            <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-logo">
+                                        </div>
+                                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                    </div>
+                                    <div class="token-options-dropdown" id="token-options" style="display: none;">
+                                        <div class="token-option" data-value="osmo">
+                                            <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-logo">
+                                        </div>
+                                        <div class="token-option" data-value="lab">
+                                            <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-logo">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-text">
+                                All participants must bet this exact amount to join
+                            </div>
+                        </div>
+
+                        <!-- Time Limit -->
+                        <div class="mb-3">
+                            <label for="time-limit" class="form-label" style="margin-left: 24px;">
+                                <i class="fas fa-clock"></i> Time Limit
+                            </label>
+                            <div class="input-group time-limit-group">
+                                <input 
+                                    type="text" 
+                                    class="form-control time-limit-input" 
+                                    id="time-limit" 
+                                    name="time_limit" 
+                                    value="never"
+                                    placeholder="never, 30m, 2h, 1d, 1w"
+                                    required>
+                                <div class="time-preset-dropdown" style="max-width: 120px;">
+                                    <div class="time-preset-display" id="time-preset-display">
+                                        <span class="preset-text">Quick Select</span>
+                                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                    </div>
+                                    <div class="time-preset-options" id="time-preset-options" style="display: none;">
+                                        <div class="time-preset-option" data-value="never">
+                                            <i class="fas fa-infinity"></i> Never
+                                        </div>
+                                        <div class="time-preset-option" data-value="30m">
+                                            <i class="fas fa-clock"></i> 30 minutes
+                                        </div>
+                                        <div class="time-preset-option" data-value="1h">
+                                            <i class="fas fa-clock"></i> 1 hour
+                                        </div>
+                                        <div class="time-preset-option" data-value="2h">
+                                            <i class="fas fa-clock"></i> 2 hours
+                                        </div>
+                                        <div class="time-preset-option" data-value="1d">
+                                            <i class="fas fa-calendar-day"></i> 1 day
+                                        </div>
+                                        <div class="time-preset-option" data-value="1w">
+                                            <i class="fas fa-calendar-week"></i> 1 week
+                                        </div>
+                                        <div class="time-preset-option" data-value="2w">
+                                            <i class="fas fa-calendar-week"></i> 2 weeks
+                                        </div>
+                                        <div class="time-preset-option" data-value="4w">
+                                            <i class="fas fa-calendar-alt"></i> 1 month
+                                        </div>
+                                        <div class="time-preset-option" data-value="8w">
+                                            <i class="fas fa-calendar-alt"></i> 2 months
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-text" style="margin-left: 24px;">
+                                How long participants can join. Use <strong>never</strong> for indefinite bets (default), or set specific times like <strong>30m</strong>, <strong>2h</strong>, <strong>1d</strong>, <strong>1w</strong>, <strong>2w</strong>, <strong>4w</strong>, up to <strong>8w</strong> (2 months).
+                            </div>
+                        </div>
+
+                        <!-- Transaction Status -->
+                        <div id="transaction-status" style="display: none;" class="mb-3">
+                            <!-- Will show transaction progress -->
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="text-center" style="margin-bottom: 2rem;">
+                            <button type="submit" id="create-bet-btn" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1.1rem; box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);">
+                                <i class="fas fa-flask"></i> Create Betting Experiment
+                            </button>
+                            <div class="mt-4">
+                                <a href="{{ url_for('index') }}" class="btn btn-secondary" style="padding: 0.75rem 2rem; font-size: 1.1rem;">
+                                    <i class="fas fa-arrow-left"></i> Back to Home
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> How It Works
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-question-circle text-primary"></i> 1. Create Question</h6>
+                            <p class="small text-muted">Write a clear question that participants can bet on. Keep it concise and unambiguous.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-list-ol text-success"></i> 2. Add Options</h6>
+                            <p class="small text-muted">Provide 2-5 possible answers. Each participant can choose one option to bet on.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-coins text-warning"></i> 3. Set Amount</h6>
+                            <p class="small text-muted">Choose a fixed amount that all participants must bet. This ensures fair competition.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-trophy text-info"></i> 4. Winners Take All</h6>
+                            <p class="small text-muted">After the outcome is determined, winners split the prize pool (minus 5% bot fee).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Note Section -->
+        <div class="row justify-content-center mt-3 mb-5">
+            <div class="col-lg-8 col-xl-6">
+                <div style="background: linear-gradient(135deg, #1e4d32 0%, #0f2419 100%); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="color: #ffffff; font-family: 'Inter', -apple-system, sans-serif; font-weight: 600; font-size: 0.95rem; line-height: 1.6; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">
+                        <i class="fas fa-lightbulb" style="color: #00ff88; margin-right: 8px; font-size: 1.1rem;"></i>
+                        <strong style="color: #00ff88;">Note:</strong> Creating a bet is free and anonymous. Participants will need wallets to join and place bets.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Token Dropdown Styles -->
+<style>
+.token-dropdown {
+    position: relative;
+}
+
+.token-select-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.75rem;
+    background-color: var(--surface-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    min-height: 38px;
+    transition: all 0.2s ease;
+}
+
+.token-select-display:hover {
+    border-color: var(--success);
+}
+
+.token-select-display.open {
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.token-select-display.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.token-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    cursor: pointer;
+}
+
+.token-option:hover {
+    background-color: rgba(0, 255, 136, 0.1);
+}
+
+.token-logo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    object-position: center;
+}
+
+.token-logo[alt="OSMO"] {
+    width: 24px;
+    height: 24px;
+}
+
+.token-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.dropdown-arrow {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+
+.token-options-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 100px;
+    width: 70px;
+    z-index: 1000;
+    background-color: var(--surface-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 0.375rem 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.token-options-dropdown .token-option {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.token-options-dropdown .token-option:last-child {
+    border-bottom: none;
+}
+
+.token-options-dropdown .token-option.selected {
+    background-color: var(--success);
+    color: white;
+}
+
+/* Time Preset Dropdown Styles */
+.time-preset-dropdown {
+    position: relative;
+}
+
+.time-preset-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.75rem;
+    background-color: var(--surface-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    min-height: 38px;
+    transition: all 0.2s ease;
+}
+
+.time-preset-display:hover {
+    border-color: var(--success);
+}
+
+.time-preset-display.open {
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.time-preset-display.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.preset-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.time-preset-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--surface-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 0.375rem 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.time-preset-option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.875rem;
+    transition: background-color 0.2s ease;
+}
+
+.time-preset-option:last-child {
+    border-bottom: none;
+}
+
+.time-preset-option:hover {
+    background-color: rgba(0, 255, 136, 0.1);
+}
+
+.time-preset-option i {
+    margin-right: 0.5rem;
+    width: 16px;
+    text-align: center;
+    color: var(--success);
+}
+
+/* Time Limit Input Group Styling */
+.time-limit-group {
+    max-width: 400px; /* Constrain the width like the bet amount field */
+    margin-left: 24px; /* Align with other form controls */
+}
+
+.time-limit-input {
+    flex: 1;
+}
+</style>
+
+<!-- Create Bet JavaScript -->
+<script>
+class BetCreator {
+    constructor() {
+        this.form = document.getElementById('create-bet-form');
+        this.creatorNameInput = document.getElementById('creator-name');
+        this.questionInput = document.getElementById('bet-question');
+        this.optionsInput = document.getElementById('bet-options');
+        this.amountInput = document.getElementById('bet-amount');
+        this.tokenSelect = document.getElementById('bet-token');
+        this.timeLimitInput = document.getElementById('time-limit');
+        this.submitBtn = document.getElementById('create-bet-btn');
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupTokenDropdown();
+        this.setupTimePresetDropdown();
+        this.validateForm(); // Initial validation
+    }
+    
+    setupEventListeners() {
+        // Form submission
+        this.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.createBet();
+        });
+        
+        // Character counter for question
+        this.questionInput.addEventListener('input', () => {
+            const counter = document.getElementById('question-counter');
+            counter.textContent = this.questionInput.value.length;
+            this.validateForm();
+        });
+        
+        // Options preview
+        this.optionsInput.addEventListener('input', () => {
+            this.updateOptionsPreview();
+            this.validateForm();
+        });
+        
+        // Amount validation
+        this.amountInput.addEventListener('input', () => {
+            this.validateForm();
+        });
+        
+        // Time limit validation
+        this.timeLimitInput.addEventListener('input', () => {
+            this.validateForm();
+        });
+        
+        this.tokenSelect.addEventListener('change', () => {
+            this.validateForm();
+        });
+    }
+    
+    setupTokenDropdown() {
+        const tokenDisplay = document.getElementById('token-display');
+        const tokenOptions = document.getElementById('token-options');
+        const hiddenSelect = document.getElementById('bet-token');
+        
+        // Toggle dropdown
+        tokenDisplay.addEventListener('click', () => {
+            const isVisible = tokenOptions.style.display === 'block';
+            tokenOptions.style.display = isVisible ? 'none' : 'block';
+            
+            // Toggle open class for styling
+            if (isVisible) {
+                tokenDisplay.classList.remove('open');
+                console.log('Dropdown closed, removed open class');
+            } else {
+                tokenDisplay.classList.add('open');
+                console.log('Dropdown opened, added open class');
+            }
+        });
+        
+        // Handle option selection
+        tokenOptions.addEventListener('click', (e) => {
+            const option = e.target.closest('.token-option');
+            if (option) {
+                const value = option.dataset.value;
+                
+                // Update hidden select
+                hiddenSelect.value = value;
+                
+                // Update display
+                const displayOption = tokenDisplay.querySelector('.token-option');
+                if (value === 'osmo') {
+                    displayOption.innerHTML = '<img src="{{ url_for("static", filename="osmo-logo.png") }}" alt="OSMO" class="token-logo">';
+                } else if (value === 'lab') {
+                    displayOption.innerHTML = '<img src="{{ url_for("static", filename="lab-logo.png") }}" alt="LAB" class="token-logo">';
+                } else {
+                    displayOption.innerHTML = `<span class="token-text">${value.toUpperCase()}</span>`;
+                }
+                
+                // Close dropdown
+                tokenOptions.style.display = 'none';
+                tokenDisplay.classList.remove('open');
+                
+                // Trigger validation
+                this.validateForm();
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!tokenDisplay.contains(e.target) && !tokenOptions.contains(e.target)) {
+                tokenOptions.style.display = 'none';
+                tokenDisplay.classList.remove('open');
+            }
+        });
+    }
+    
+    updateOptionsPreview() {
+        const optionsText = this.optionsInput.value.trim();
+        const preview = document.getElementById('options-preview');
+        const list = document.getElementById('options-list');
+        
+        if (optionsText) {
+            const options = optionsText.split(',').map(opt => opt.trim()).filter(opt => opt);
+            
+            if (options.length > 0) {
+                list.innerHTML = options.map((opt, idx) => 
+                    `<li><strong>Option ${idx + 1}:</strong> ${opt}</li>`
+                ).join('');
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    
+    setupTimePresetDropdown() {
+        const presetDisplay = document.getElementById('time-preset-display');
+        const presetOptions = document.getElementById('time-preset-options');
+        const timeLimitInput = this.timeLimitInput;
+        
+        // Toggle dropdown
+        presetDisplay.addEventListener('click', () => {
+            const isVisible = presetOptions.style.display === 'block';
+            presetOptions.style.display = isVisible ? 'none' : 'block';
+            
+            // Toggle open class for styling
+            if (isVisible) {
+                presetDisplay.classList.remove('open');
+            } else {
+                presetDisplay.classList.add('open');
+            }
+        });
+        
+        // Handle preset selection
+        presetOptions.addEventListener('click', (e) => {
+            const option = e.target.closest('.time-preset-option');
+            if (option) {
+                const value = option.dataset.value;
+                
+                // Update input field
+                timeLimitInput.value = value;
+                
+                // Close dropdown
+                presetOptions.style.display = 'none';
+                presetDisplay.classList.remove('open');
+                
+                // Trigger validation
+                this.validateForm();
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!presetDisplay.contains(e.target) && !presetOptions.contains(e.target)) {
+                presetOptions.style.display = 'none';
+                presetDisplay.classList.remove('open');
+            }
+        });
+    }
+    
+    isValidTimeFormat(timeStr) {
+        if (!timeStr) return false;
+        
+        // Handle indefinite options
+        if (['never', 'indefinite', 'infinite', '∞'].includes(timeStr.toLowerCase())) return true;
+        
+        // If it's just a number, assume minutes
+        if (/^\d+$/.test(timeStr)) return true;
+        
+        // Check format like "2h", "30m", "1d", "1w"
+        return /^\d+(?:\.\d+)?\s*[mhdw]$/i.test(timeStr);
+    }
+    
+    validateForm() {
+        const hasQuestion = this.questionInput.value.trim().length > 0;
+        const hasOptions = this.optionsInput.value.trim().length > 0;
+        const hasAmount = this.amountInput.value && parseFloat(this.amountInput.value) > 0;
+        const timeLimit = this.timeLimitInput.value.trim();
+        const hasValidTimeLimit = this.isValidTimeFormat(timeLimit);
+        
+        // Validate options count
+        const options = this.optionsInput.value.split(',').map(opt => opt.trim()).filter(opt => opt);
+        const validOptionsCount = options.length >= 2 && options.length <= 5;
+        
+        const isValid = hasQuestion && hasOptions && hasAmount && hasValidTimeLimit && validOptionsCount;
+        
+        this.submitBtn.disabled = !isValid;
+        
+        if (hasQuestion && hasOptions && hasAmount) {
+            if (!validOptionsCount) {
+                this.submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Need 2-5 Options';
+                this.submitBtn.className = 'btn btn-warning btn-lg';
+            } else {
+                this.submitBtn.innerHTML = '<i class="fas fa-flask"></i> Create Betting Experiment';
+                this.submitBtn.className = 'btn btn-success btn-lg';
+            }
+        } else {
+            this.submitBtn.innerHTML = '<i class="fas fa-flask"></i> Create Betting Experiment';
+            this.submitBtn.className = 'btn btn-success btn-lg';
+        }
+    }
+    
+    async createBet() {
+        const statusDiv = document.getElementById('transaction-status');
+        const submitBtn = this.submitBtn;
+        
+        try {
+            // Show progress
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-spinner fa-spin"></i> Creating bet...
+                </div>
+            `;
+            submitBtn.disabled = true;
+            
+            // Prepare bet data
+            const betData = {
+                question: this.questionInput.value.trim(),
+                options: this.optionsInput.value.trim(),
+                bet_amount: parseFloat(this.amountInput.value),
+                token: this.tokenSelect.value,
+                creator_name: this.creatorNameInput.value.trim(),
+                time_limit: this.timeLimitInput.value.trim()
+            };
+            
+            // Create bet via API
+            const response = await fetch('/api/create-bet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(betData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> 
+                        <strong>Bet Created Successfully!</strong><br>
+                        <small>Bet ID: #${result.bet_id}</small>
+                    </div>
+                `;
+                
+                // Redirect to home page after delay
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                
+            } else {
+                throw new Error(result.error || 'Failed to create bet');
+            }
+            
+        } catch (error) {
+            console.error('Bet creation failed:', error);
+            
+            statusDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Creation Failed:</strong><br>
+                    <small>${error.message}</small>
+                </div>
+            `;
+            
+            submitBtn.disabled = false;
+        }
+    }
+    
+    showError(message) {
+        const statusDiv = document.getElementById('transaction-status');
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> ${message}
+            </div>
+        `;
+    }
+}
+
+// Initialize bet creator when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new BetCreator();
+});
+</script>
+
+{% endblock %}

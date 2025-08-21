@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Active Bets - MadBet{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="search-container">
+                <div class="text-center">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-play-circle text-success"></i> Live Betting
+                    </h1>
+                    <p class="lead text-muted">
+                        {% if bets %}
+                            {{ bets | length }} active betting pool{{ 's' if bets | length != 1 else '' }} available
+                        {% else %}
+                            No active bets at the moment
+                        {% endif %}
+                    </p>
+                    {% if bets %}
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ bets | length }}</div>
+                                <div class="stat-label">Active Bets</div>
+                                <i class="fas fa-fire stat-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ bets | sum(attribute='participants') | length }}</div>
+                                <div class="stat-label">Total Participants</div>
+                                <i class="fas fa-users stat-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ (bets | sum(attribute='total_pool')) | format_token }}</div>
+                                <div class="stat-label">Total Pool Value</div>
+                                <i class="fas fa-coins stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if bets %}
+            
+        <!-- Bet Cards -->
+        <div class="row">
+            {% for bet in bets %}
+            <div class="col-12 slide-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                <div class="card bet-card active mb-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">
+                                    <span class="badge badge-live me-2">
+                                        <i class="fas fa-circle"></i> Live
+                                    </span>
+                                    Bet #{{ bet.id }}
+                                </h4>
+                                <div class="bet-question">{{ bet.question }}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="token-amount h5 mb-0">
+                                    {{ bet.total_pool | format_token }} 
+                                    {% if bet.bet_token.upper() == 'OSMO' %}
+                                        <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                    {% elif bet.bet_token.upper() == 'LAB' %}
+                                        <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                    {% else %}
+                                        {{ bet.bet_token.upper() }}
+                                    {% endif %}
+                                </div>
+                                <small class="text-light">Total Pool</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Bet Metadata -->
+                        <div class="bet-metadata">
+                            <div class="item">
+                                <i class="fas fa-user-crown"></i>
+                                <span><strong>Creator:</strong> {{ bet.creator | get_username }}</span>
+                            </div>
+                            <div class="item">
+                                <i class="fas fa-coins"></i>
+                                <span><strong>Entry:</strong> {{ bet.bet_amount | format_token }} 
+                                {% if bet.bet_token.upper() == 'OSMO' %}
+                                    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                {% elif bet.bet_token.upper() == 'LAB' %}
+                                    <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                {% else %}
+                                    {{ bet.bet_token.upper() }}
+                                {% endif %}</span>
+                            </div>
+                            <div class="item">
+                                <i class="fas fa-users"></i>
+                                <span><strong>Participants:</strong> {{ bet.participants | length }}</span>
+                            </div>
+                            <div class="item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span><strong>Created:</strong> {{ bet.created_at | format_datetime }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Betting Options -->
+                        <div class="bet-options">
+                            <h6 class="mb-3"><i class="fas fa-list-ul"></i> Betting Options</h6>
+                            {% for option in bet.options %}
+                                {% set option_bets = bet.participants | selectattr('option', 'equalto', loop.index0) | list %}
+                                {% set option_total = option_bets | length * bet.bet_amount %}
+                                {% set option_percentage = (option_total / bet.total_pool * 100) if bet.total_pool > 0 else 0 %}
+                                
+                                <div class="bet-option">
+                                    <div class="option-header">
+                                        <div class="option-name">
+                                            <strong>{{ loop.index }}.</strong> {{ option }}
+                                        </div>
+                                        <div class="option-stats">
+                                            <span class="badge badge-primary">
+                                                {{ option_bets | length }} bet{{ 's' if option_bets | length != 1 else '' }}
+                                            </span>
+                                            <span class="token-amount">
+                                                {{ option_total | format_token }} 
+                                                {% if bet.bet_token.upper() == 'OSMO' %}
+                                                    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                {% elif bet.bet_token.upper() == 'LAB' %}
+                                                    <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                {% else %}
+                                                    {{ bet.bet_token.upper() }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="option-progress">
+                                        <div class="option-progress-bar" style="width: {{ option_percentage }}%"></div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">{{ "%.1f" | format(option_percentage) }}% of total pool</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Participants -->
+                        {% if bet.participants %}
+                        <div class="bet-participants">
+                            <h6 class="mb-3"><i class="fas fa-users"></i> Recent Participants</h6>
+                            {% for participant in bet.participants[:5] %}
+                            <div class="participant">
+                                <div class="participant-name">
+                                    <i class="fab fa-discord"></i> {{ participant.username }}
+                                    <br>
+                                    <small class="text-muted">→ {{ bet.options[participant.option] }}</small>
+                                </div>
+                                <div>
+                                    <div class="participant-amount">
+                                        {{ participant.amount | format_token }} 
+                                        {% if participant.token.upper() == 'OSMO' %}
+                                            <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                        {% elif participant.token.upper() == 'LAB' %}
+                                            <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                        {% else %}
+                                            {{ participant.token.upper() }}
+                                        {% endif %}
+                                    </div>
+                                    {% if participant.tx_hash %}
+                                    <a href="https://www.mintscan.io/osmosis/txs/{{ participant.tx_hash }}" 
+                                       target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                        <i class="fas fa-external-link-alt"></i> TX
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if bet.participants | length > 5 %}
+                            <div class="text-center mt-2">
+                                <small class="text-muted">
+                                    ... and {{ bet.participants | length - 5 }} more participant{{ 's' if bet.participants | length - 5 != 1 else '' }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Join this bet through the Discord bot
+                            </small>
+                            <span class="badge badge-warning">
+                                <i class="fas fa-percentage"></i> 
+                                Bot Fee: 5% ({{ (bet.total_pool * 0.05) | format_token }} 
+                                {% if bet.bet_token.upper() == 'OSMO' %}
+                                    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                {% elif bet.bet_token.upper() == 'LAB' %}
+                                    <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                {% else %}
+                                    {{ bet.bet_token.upper() }}
+                                {% endif %})
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+            
+    {% else %}
+        <!-- Empty State -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-moon fa-4x text-muted"></i>
+                        </div>
+                        <h3 class="mb-3">No Active Bets</h3>
+                        <p class="text-muted mb-4">
+                            There are no active betting pools at the moment.<br>
+                            Create a new bet using the Discord bot to get started!
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('past_results') }}" class="btn btn-primary">
+                                <i class="fas fa-history"></i> View Past Results
+                            </a>
+                            <a href="{{ url_for('search_bet') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-search"></i> Search Bet
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

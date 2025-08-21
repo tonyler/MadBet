@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Past Results - MadBet{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-history text-info"></i> Past Results
+        </h2>
+        
+        {% if bets %}
+            <p class="lead">{{ bets | length }} completed betting pool{{ 's' if bets | length != 1 else '' }}</p>
+            
+            {% for bet in bets %}
+            <div class="card mb-4">
+                <div class="card-header {% if bet.cancelled %}bg-warning{% else %}bg-info{% endif %} text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="fas fa-question-circle"></i> 
+                                Bet #{{ bet.id }}: {{ bet.question }}
+                            </h5>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if bet.cancelled %}
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-ban"></i> Cancelled
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-check-circle"></i> Completed
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Creator:</strong><br>
+                            <span class="badge bg-primary">{{ bet.creator | get_username }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Total Pool:</strong><br>
+                            {{ bet.total_pool | format_token }} 
+                            {% if bet.bet_token and bet.bet_token.upper() == 'OSMO' %}
+                                <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                            {% elif bet.bet_token and bet.bet_token.upper() == 'LAB' %}
+                                <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                            {% else %}
+                                {{ bet.bet_token.upper() if bet.bet_token else 'OSMO' }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Participants:</strong><br>
+                            {{ bet.participants | length }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Status:</strong><br>
+                            {% if bet.cancelled %}
+                                <span class="badge bg-warning">Cancelled & Refunded</span>
+                            {% else %}
+                                <span class="badge bg-success">Winners Paid</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if not bet.cancelled %}
+                        <!-- Winning Result -->
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-trophy"></i> Winning Option:</h6>
+                            <strong>{{ bet.options[bet.winning_option] }}</strong>
+                        </div>
+                        
+                        <!-- Winners and Payouts -->
+                        {% if bet.distribution_result and bet.distribution_result.successful_payouts %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-crown text-warning"></i> Winners:</h6>
+                                <div class="list-group">
+                                    {% for payout in bet.distribution_result.successful_payouts %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong class="text-success">{{ payout.username }}</strong>
+                                                <br>
+                                                <small class="text-muted">Winner</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-success">
+                                                    +{{ payout.amount | format_token }} 
+                                                    {% if payout.token.upper() == 'OSMO' %}
+                                                        <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                    {% elif payout.token.upper() == 'LAB' %}
+                                                        <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                    {% else %}
+                                                        {{ payout.token.upper() }}
+                                                    {% endif %}
+                                                </span>
+                                                {% if payout.tx_hash %}
+                                                <br>
+                                                <a href="https://www.mintscan.io/osmosis/txs/{{ payout.tx_hash }}" 
+                                                   target="_blank" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-external-link-alt"></i> Payout TX
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-users"></i> All Participants:</h6>
+                                <div class="list-group">
+                                    {% for participant in bet.participants %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong {% if participant.option == bet.winning_option %}class="text-success"{% endif %}>
+                                                    {{ participant.username }}
+                                                </strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    Bet on: {{ bet.options[participant.option] }}
+                                                    {% if participant.option == bet.winning_option %}
+                                                        <i class="fas fa-crown text-warning"></i>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge {% if participant.option == bet.winning_option %}bg-success{% else %}bg-secondary{% endif %}">
+                                                    {{ participant.amount | format_token }} 
+                                                    {% if participant.token.upper() == 'OSMO' %}
+                                                        <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                    {% elif participant.token.upper() == 'LAB' %}
+                                                        <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                    {% else %}
+                                                        {{ participant.token.upper() }}
+                                                    {% endif %}
+                                                </span>
+                                                {% if participant.tx_hash %}
+                                                <br>
+                                                <a href="https://www.mintscan.io/osmosis/txs/{{ participant.tx_hash }}" 
+                                                   target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-external-link-alt"></i> Bet TX
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payout Breakdown -->
+                        {% if bet.payout_data %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-calculator"></i> Payout Breakdown:</h6>
+                                        <div class="row text-center">
+                                            <div class="col-md-3">
+                                                <strong>Total Pool:</strong><br>
+                                                {{ bet.payout_data.total_pool | format_token }} 
+                                                {% if bet.bet_token.upper() == 'OSMO' %}
+                                                    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                {% elif bet.bet_token.upper() == 'LAB' %}
+                                                    <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                {% else %}
+                                                    {{ bet.bet_token.upper() }}
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Bot Fee (5%):</strong><br>
+                                                {{ bet.payout_data.bot_fee | format_token }} 
+                                                {% if bet.bet_token.upper() == 'OSMO' %}
+                                                    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                {% elif bet.bet_token.upper() == 'LAB' %}
+                                                    <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                {% else %}
+                                                    {{ bet.bet_token.upper() }}
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Payout Pool:</strong><br>
+                                                {{ bet.payout_data.payout_pool | format_token }} 
+                                                {% if bet.bet_token.upper() == 'OSMO' %}
+                                                    <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                {% elif bet.bet_token.upper() == 'LAB' %}
+                                                    <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                {% else %}
+                                                    {{ bet.bet_token.upper() }}
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Winners:</strong><br>
+                                                {{ bet.payout_data.winners | length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                No winners - nobody bet on the winning option!
+                            </div>
+                        {% endif %}
+                        
+                    {% else %}
+                        <!-- Cancelled Bet Information -->
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-ban"></i> Bet Cancelled:</h6>
+                            <p class="mb-0">This bet was cancelled by {{ bet.cancelled_by }}. All participants were refunded.</p>
+                        </div>
+                        
+                        {% if bet.refund_results and bet.refund_results.successful_refunds %}
+                        <div class="row">
+                            <div class="col-12">
+                                <h6><i class="fas fa-undo"></i> Refunded Participants:</h6>
+                                <div class="list-group">
+                                    {% for refund in bet.refund_results.successful_refunds %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ refund.username }}</strong>
+                                                <br>
+                                                <small class="text-muted">Refunded</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-warning">
+                                                    {{ refund.amount | format_token }} 
+                                                    {% if refund.token.upper() == 'OSMO' %}
+                                                        <img src="{{ url_for('static', filename='osmo-logo.png') }}" alt="OSMO" class="token-inline">
+                                                    {% elif refund.token.upper() == 'LAB' %}
+                                                        <img src="{{ url_for('static', filename='lab-logo.png') }}" alt="LAB" class="token-inline">
+                                                    {% else %}
+                                                        {{ refund.token.upper() }}
+                                                    {% endif %}
+                                                </span>
+                                                {% if refund.tx_hash %}
+                                                <br>
+                                                <a href="https://www.mintscan.io/osmosis/txs/{{ refund.tx_hash }}" 
+                                                   target="_blank" class="btn btn-sm btn-outline-warning">
+                                                    <i class="fas fa-external-link-alt"></i> Refund TX
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt"></i> 
+                                Created: {{ bet.created_at | format_datetime }}
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-check"></i> 
+                                {% if bet.cancelled %}
+                                    Cancelled: {{ bet.cancelled_at | format_datetime }}
+                                {% else %}
+                                    Ended: {{ bet.ended_at | format_datetime }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                    <h4>No Past Results</h4>
+                    <p class="text-muted">No betting pools have been completed yet.</p>
+                    <a href="{{ url_for('active_bets') }}" class="btn btn-primary">
+                        <i class="fas fa-play-circle"></i> View Active Bets
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
