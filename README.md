@@ -92,21 +92,12 @@ madv2/
 - Automatic wallet creation & management
 
 ### 🌐 Web Interface
-- Beautiful dark theme with token logos
 - Active bets display with real-time data
 - Bet creation interface
 - Past results and statistics
 - Mobile-responsive design
 
-### 🔧 Technical Features
-- **Circular Buffer**: Only keeps latest 100 bets for performance
-- **Auto-restart**: OsmoJS service keeper ensures 100% uptime
-- **Token Support**: OSMO and LAB tokens with proper logos
-- **Logging**: Comprehensive logging system
-- **Clean Architecture**: Well-organized, maintainable code
-
 ## 🛡️ Reliability
-
 The system ensures **maximum uptime**:
 - Service keeper monitors OsmoJS every 10 seconds
 - Automatic restart on crashes or unresponsiveness  
@@ -126,4 +117,3 @@ The system ensures **maximum uptime**:
 2. **Monitor**: `tail -f logs/web_app.log logs/bot.log logs/osmjs_keeper.log`
 3. **Stop**: `./stop_all.sh`
 
-That's it! Clean, simple, and bulletproof. 🎯
