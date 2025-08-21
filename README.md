@@ -113,3 +113,4 @@ The system ensures **maximum uptime**:
 - Keplr and Leap wallet integrations on webapp (Discord is not needed anymore for betting)
 - Recreating whole app in CosmWasm (decentralizing it)
 - Ability to bet dynamic amounts of money (currently a fixed entry can be bet)
+- Increased security in saving discord wallet-created seed prhrases
