@@ -89,7 +89,8 @@ madv2/
 - `/bet` - Join existing bets
 - `/balance` - Check token balances
 - `/betlist` - View active bets
-- Automatic wallet creation & management
+- `endbet` - Automatically distribute rewards to winner (by Admins and bet's creator) 
+- `/cancel_bet` - Cancel a bet and return all players (by Admins or bet's creator)
 
 ### 🌐 Web Interface
 - Active bets display with real-time data
