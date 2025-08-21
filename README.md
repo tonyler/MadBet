@@ -30,14 +30,7 @@ pip install -r requirements.txt
 ./stop_all.sh
 ```
 
-## 🔐 Security Notes
-
-- **Never commit `config.py`** - Contains sensitive wallet data
-- **Never commit `data/user_wallets.json`** - Contains user private keys
-- **Review `.gitignore`** - Protects sensitive files
-
 ## 📁 Project Structure
-
 ```
 madv2/
 ├── README.md                 # This file
