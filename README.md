@@ -105,15 +105,17 @@ The system ensures **maximum uptime**:
 - Clean error handling and logging
 
 ## 💰 Supported Tokens
-
 - **OSMO**: Native Osmosis token
 - **LAB**: Factory token (factory/osmo17fel472lgzs87ekt9dvk0zqyh5gl80sqp4sk4n/LAB)
 
 *Note: OSMO is always used for gas fees*
 
 ## 🔄 Operation
-
 1. **Start**: `./run_all.sh`
 2. **Monitor**: `tail -f logs/web_app.log logs/bot.log logs/osmjs_keeper.log`
 3. **Stop**: `./stop_all.sh`
 
+## 🚀 Coming Soon
+- Keplr and Leap wallet integrations on webapp (Discord is not needed anymore for betting)
+- Recreating whole app in CosmWasm (decentralizing it)
+- Ability to bet dynamic amounts of money (currently a fixed entry can be bet)
