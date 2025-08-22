@@ -1,6 +1,7 @@
 # 🧪 MadBet - Osmosis Betting Platform
 
 A Discord betting bot with web interface and transactions on the Osmosis blockchain. Create, manage, and participate in decentralized betting pools with OSMO and LAB tokens.
+<img width="1200" height="630" alt="image" src="https://github.com/user-attachments/assets/6e602ddf-931b-4311-95e6-cd9672b0dc57" />
 
 **🌐 WebApp:** [madbet.xyz](https://madbet.xyz)
 
